@@ -4,6 +4,8 @@ import (
 	"testing"
 )
 
+var tempvid string
+
 func clearTables() {
 	dbConn.Exec("delete from users")
 	dbConn.Exec("delete from  video_info")
@@ -55,5 +57,44 @@ func testRegetUser(t *testing.T) {
 	}
 	if pwd != "" {
 		t.Errorf("Deleting user test failed")
+	}
+}
+
+func TestGetVideoInfo(t *testing.T) {
+	clearTables()
+	t.Run("PrepPateUser", testAddUser)
+	t.Run("AddVideo", testAddNewView)
+	t.Run("GetVideo", testGetVideoInfo)
+	t.Run("DeleteVideo", testDeleteVideoInfo)
+	t.Run("ReGetVideo", testReGetVideoInfo)
+
+}
+
+func testAddNewView(t *testing.T) {
+	vi, err := AddNewView(1, "my-video")
+	if err != nil {
+		t.Errorf("Error of AddVideo: %v", err)
+	}
+	tempvid = vi.Id
+}
+
+func testGetVideoInfo(t *testing.T) {
+	_, err := GetVideoInfo(tempvid)
+	if err != nil {
+		t.Errorf("Error of GetVideo: %v", err)
+	}
+}
+
+func testDeleteVideoInfo(t *testing.T) {
+	err := DeleteVideoInfo(tempvid)
+	if err != nil {
+		t.Errorf("Error of DeleteVideo: %v", err)
+	}
+}
+
+func testReGetVideoInfo(t *testing.T) {
+	vi, err := GetVideoInfo(tempvid)
+	if err != nil || vi != nil {
+		t.Errorf("Error of GetVideo: %v", err)
 	}
 }
