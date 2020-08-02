@@ -10,8 +10,8 @@ var (
 	err    error
 )
 
-func init(){
-	dbConn, err = sql.Open("postgres", "port=5432 user=danning password='' dbname=video_server sslmode=disable")
+func init() {
+	dbConn, err = sql.Open("postgres", "port=5432 user=postgres password='123456' dbname=video_server sslmode=disable")
 	//port是数据库的端口号，默认是5432，如果改了，这里一定要自定义；
 	//user就是你数据库的登录帐号;
 	//dbname就是你在数据库里面建立的数据库的名字;
