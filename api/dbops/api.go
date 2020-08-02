@@ -86,7 +86,7 @@ func GetVideoInfo(vid string) (*defs.VideoInfo, error) {
 	if err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
-	if err == sql.ErrNoRows{
+	if err == sql.ErrNoRows {
 		return nil, nil
 	}
 	defer stmtOut.Close()
@@ -107,4 +107,51 @@ func DeleteVideoInfo(vid string) error {
 	}
 	defer stmtDel.Close()
 	return nil
+}
+
+func AddNewComments(vid string, aid int, content string) error {
+	id, err := utils.NewUUID()
+	if err != nil {
+		return err
+	}
+	t := time.Now()
+	timeLayout := "2006-01-02 15:04:05"
+	ctime := t.Format(timeLayout) //M D y, HH:MM:SS
+	stmtIns, err := dbConn.Prepare("Insert INTO comments(id,video_id,author_id,content,time) Values ($1,$2,$3,$4,$5)")
+	if err != nil {
+		return err
+	}
+	_, err = stmtIns.Exec(id, vid, aid, content, ctime)
+	if err != nil {
+		return err
+	}
+	defer stmtIns.Close()
+	return nil
+}
+
+func ListComments(vid string, from, to int64) ([]*defs.Comment, error) {
+	stmtOut, err := dbConn.Prepare(`select comments.id,users.login_name,comments.content from comments
+                                                              inner join users on comments.author_id=users.id
+											where comments.video_id=$1 and comments.time>=$2 and comments.time <=$3`)
+	if err != nil {
+		return nil, err
+	}
+	timeLayout := "2006-01-02 15:04:05"
+	fromStr := time.Unix(from, 0).Format(timeLayout)
+	toStr := time.Unix(to, 0).Format(timeLayout)
+
+	var res []*defs.Comment
+
+	rows, err := stmtOut.Query(vid, fromStr, toStr)
+
+	for rows.Next() {
+		var id, name, content string
+		if err := rows.Scan(&id, &name, &content); err != nil {
+			return res, err
+		}
+		c := &defs.Comment{Id: id, VideoId: vid, Author: name, Content: content}
+		res = append(res, c)
+	}
+	defer stmtOut.Close()
+	return res, nil
 }

@@ -12,16 +12,17 @@ create table users
 
 create table video_info
 (
-    id                 serial PRIMARY KEY,
+    id                 character varying(64) PRIMARY KEY,
     author_id int,
     name text,
     display_name text,
-    create_time timestamp
+    display_ctime character varying(64),
+    create_time character varying(64)
 );
 
 create table comments
 (
-     id          character varying(64) PRIMARY KEY not null ,
+    id          character varying(64) PRIMARY KEY not null ,
     video_id          character varying(64),
     author_id int,
     content text,
@@ -30,9 +31,10 @@ create table comments
 
 create table sessions
 (
-     session_id         text PRIMARY KEY not null ,
+    session_id         text PRIMARY KEY not null ,
     video_id          character varying(64),
-    login_name character varying(64)
+    login_name character varying(64),
+    ttl      character varying(64),
 );
 ```
 ## 数据库相关api在dbops中

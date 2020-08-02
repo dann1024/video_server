@@ -1,15 +1,17 @@
 package dbops
 
 import (
+	"fmt"
 	"testing"
+	"time"
 )
 
 var tempvid string
 
 func clearTables() {
-	dbConn.Exec("delete from users")
-	dbConn.Exec("delete from  video_info")
-	dbConn.Exec("delete from  comments")
+	dbConn.Exec("delete from users; ALTER SEQUENCE users_id_seq RESTART WITH 1;")
+	dbConn.Exec("delete from  video_info; ")
+	dbConn.Exec("delete from  comments; ")
 }
 
 func TestMain(m *testing.M) {
@@ -96,5 +98,36 @@ func testReGetVideoInfo(t *testing.T) {
 	vi, err := GetVideoInfo(tempvid)
 	if err != nil || vi != nil {
 		t.Errorf("Error of GetVideo: %v", err)
+	}
+}
+
+func TestGetComments(t *testing.T) {
+	clearTables()
+	t.Run("PrepPateUser", testAddUser)
+	t.Run("Get", testGetUser)
+	t.Run("AddVideo", testAddNewComments)
+	t.Run("GetVideo", testListComments)
+}
+
+func testAddNewComments(t *testing.T) {
+	vid := "12345"
+	aid := 1
+	commemts := "i like this video"
+	err := AddNewComments(vid, aid, commemts)
+	if err != nil {
+		t.Errorf("Error of AddNewComments: %v", err)
+	}
+}
+
+func testListComments(t *testing.T) {
+	vid := "12345"
+	from := int64(1514764800)
+	to := time.Now().Unix()
+	res, err := ListComments(vid, from, to)
+	if err != nil {
+		t.Errorf("Error of ListComments: %v", err)
+	}
+	for i, ele := range res {
+		fmt.Printf("comment:%d, %v \n", i, ele)
 	}
 }
